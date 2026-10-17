@@ -36,17 +36,19 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install buildozer cython
 
-      - name: Android SDK ve AIDL kur
+      - name: Android SDK kur
         run: |
           SDK="$HOME/.buildozer/android/platform/android-sdk"
-          mkdir -p "$SDK"
-          mkdir -p "$SDK/cmdline-tools"
+          mkdir -p "$SDK/tools"
           wget -q https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip -O /tmp/tools.zip
           mkdir -p /tmp/android-tools
           unzip -q /tmp/tools.zip -d /tmp/android-tools
-          mv /tmp/android-tools/cmdline-tools "$SDK/cmdline-tools/latest"
-          yes | "$SDK/cmdline-tools/latest/bin/sdkmanager" --sdk_root="$SDK" --licenses || true
-          "$SDK/cmdline-tools/latest/bin/sdkmanager" --sdk_root="$SDK" "platform-tools" "platforms;android-35" "build-tools;35.0.0"
+          mv /tmp/android-tools/cmdline-tools "$SDK/tools"
+          mv "$SDK/tools/cmdline-tools" "$SDK/tools/latest"
+          mkdir -p "$SDK/tools/bin"
+          ln -sf "$SDK/tools/latest/bin/sdkmanager" "$SDK/tools/bin/sdkmanager"
+          yes | "$SDK/tools/bin/sdkmanager" --sdk_root="$SDK" --licenses || true
+          "$SDK/tools/bin/sdkmanager" --sdk_root="$SDK" "platform-tools" "platforms;android-35" "build-tools;35.0.0"
 
       - name: APK derle
         run: |
