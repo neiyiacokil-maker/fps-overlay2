@@ -36,22 +36,20 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install buildozer cython
 
-      - name: Android SDK lisanslarını kabul et
+      - name: Android SDK ve AIDL kur
         run: |
           SDK="$HOME/.buildozer/android/platform/android-sdk"
           mkdir -p "$SDK"
-          buildozer android debug 2>&1 | tee build.log
-        continue-on-error: true
+          mkdir -p "$SDK/cmdline-tools"
+          wget -q https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip -O /tmp/tools.zip
+          mkdir -p /tmp/android-tools
+          unzip -q /tmp/tools.zip -d /tmp/android-tools
+          mv /tmp/android-tools/cmdline-tools "$SDK/cmdline-tools/latest"
+          yes | "$SDK/cmdline-tools/latest/bin/sdkmanager" --sdk_root="$SDK" --licenses || true
+          "$SDK/cmdline-tools/latest/bin/sdkmanager" --sdk_root="$SDK" "platform-tools" "platforms;android-35" "build-tools;35.0.0"
 
-      - name: AIDL aracını kontrol et ve derle
+      - name: APK derle
         run: |
-          SDK="$HOME/.buildozer/android/platform/android-sdk"
-          echo "SDK kontrol ediliyor..."
-          find "$SDK" -type f -name aidl -print
-          if ! find "$SDK" -type f -name aidl | grep -q .; then
-            echo "AIDL bulunamadı. Buildozer SDK kurulumunu kontrol et."
-            exit 1
-          fi
           buildozer android debug
 
       - name: APK dosyasını yükle
